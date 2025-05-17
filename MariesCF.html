@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marie's Grand Computer Conundrum Resolver</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Lato:wght@400;700&display=swap');
+
+        :root {
+            --primary-font: 'Cormorant Garamond', serif;
+            --heading-font: 'Playfair Display', serif;
+            --ui-font: 'Lato', sans-serif;
+
+            --bg-color: #2c001e; /* Deep, rich plum/burgundy */
+            --card-bg-color: #fdf6e3; /* Parchment/cream */
+            --text-color: #4a3b31; /* Dark, warm brown */
+            --heading-color: #b08d57; /* Antique Gold */
+            --accent-color: #8c522c; /* Richer brown/copper for accents */
+            --button-bg-color: #5a3928; /* Darker, rich brown for buttons */
+            --button-text-color: #fdf6e3; /* Cream text on buttons */
+            --button-hover-bg-color: #4a2d1e; /* Darker hover for buttons */
+            --input-border-color: #d4c8b0; /* Muted border for inputs */
+            --success-color: #507a39; /* Muted, elegant green */
+            --error-color: #a34141; /* Muted, elegant red */
+            --quirky-comment-color: #7a6a5a; /* Muted brown for Michael McDonald */
+        }
+
+        body {
+            font-family: var(--primary-font);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+            background-image: 
+                linear-gradient(135deg, rgba(255,255,255,0.03) 25%, transparent 25%),
+                linear-gradient(225deg, rgba(255,255,255,0.03) 25%, transparent 25%),
+                linear-gradient(45deg, rgba(255,255,255,0.03) 25%, transparent 25%),
+                linear-gradient(315deg, rgba(255,255,255,0.03) 25%, var(--bg-color) 25%);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 0, 0 20px, 20px 20px; /* Subtle diamond/argyle pattern */
+        }
+
+        .simulator-container {
+            background-color: var(--card-bg-color);
+            padding: 30px 35px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), 0 0 0 5px var(--heading-color); /* Gold border effect */
+            width: 100%;
+            max-width: 650px;
+            text-align: left;
+            border: 1px solid rgba(176, 141, 87, 0.5); /* Fainter inner border */
+        }
+
+        h1 {
+            font-family: var(--heading-font);
+            color: var(--heading-color);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        #dialogue-area {
+            min-height: 120px;
+            margin-bottom: 25px;
+            padding: 20px;
+            border: 1px dashed var(--input-border-color);
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.4); /* Slightly transparent inner bg */
+            line-height: 1.7;
+            font-size: 1.1em;
+        }
+
+        #dialogue-area p, #dialogue-area div {
+            margin-bottom: 12px;
+        }
+        
+        #dialogue-area .question-prompt {
+            font-weight: 600;
+            color: var(--accent-color);
+            margin-top: 20px;
+            font-family: var(--ui-font);
+        }
+
+        #dialogue-area .quirky-comment {
+            color: var(--quirky-comment-color);
+            font-size: 0.95em;
+            font-style: italic;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid var(--input-border-color);
+        }
+
+        #options-area {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        #options-area input[type="text"] {
+            padding: 12px 15px;
+            border: 1px solid var(--input-border-color);
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: var(--primary-font);
+            margin-bottom: 10px;
+            width: calc(100% - 32px); 
+            background-color: #fff;
+            color: var(--text-color);
+        }
+        #options-area input[type="text"]::placeholder {
+            color: #999;
+        }
+
+
+        #options-area button {
+            background-color: var(--button-bg-color);
+            color: var(--button-text-color);
+            border: none;
+            padding: 14px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.05em;
+            font-family: var(--ui-font);
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease;
+            text-align: left;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+        }
+
+        #options-area button:hover {
+            background-color: var(--button-hover-bg-color);
+            transform: translateY(-1px);
+        }
+        
+        #options-area button.secondary {
+            background-color: var(--accent-color);
+        }
+        #options-area button.secondary:hover {
+            background-color: var(--button-bg-color);
+        }
+
+
+        .loading-indicator {
+            color: var(--accent-color);
+            font-style: italic;
+            text-align: center;
+            padding: 10px;
+            font-family: var(--ui-font);
+        }
+
+        .solved-message {
+            color: var(--success-color);
+            font-weight: bold;
+            font-family: var(--ui-font);
+            font-size: 1.1em;
+        }
+
+        .escalation-message {
+            color: var(--error-color);
+            font-weight: bold;
+            font-family: var(--ui-font);
+            font-size: 1.1em;
+        }
+        
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 1em;
+            color: var(--card-bg-color); /* Light text against dark bg */
+            font-family: var(--primary-font);
+        }
+
+        #share-info-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
+            padding-top: 60px;
+        }
+
+        #share-info-content {
+            background-color: var(--card-bg-color);
+            color: var(--text-color);
+            margin: 5% auto;
+            padding: 25px 30px;
+            border: 3px solid var(--heading-color);
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        #share-info-content h3 {
+            color: var(--heading-color);
+            font-family: var(--heading-font);
+            margin-top: 0;
+        }
+        #share-info-content p, #share-info-content ul {
+            font-family: var(--ui-font);
+            line-height: 1.6;
+        }
+        #share-info-content li { margin-bottom: 8px; }
+        .close-modal-button {
+            color: var(--button-text-color);
+            background-color: var(--button-bg-color);
+            float: right;
+            font-size: 1.2em;
+            font-weight: bold;
+            padding: 5px 12px;
+            border-radius: 5px;
+            border: none;
+        }
+        .close-modal-button:hover,
+        .close-modal-button:focus {
+            background-color: var(--button-hover-bg-color);
+            text-decoration: none;
+            cursor: pointer;
+        }
+        #copy-url-button { /* Style for a potential copy button if hosted */
+             margin-top: 15px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="simulator-container">
+        <h1>Marie's Grand Computer Conundrum Resolver <span style="font-size:0.7em;">⚜️</span></h1>
+
+        <div id="dialogue-area">
+            <!-- Messages will appear here -->
+        </div>
+
+        <div class="loading-indicator" style="display: none;">Contemplating...</div>
+
+        <div id="options-area">
+            <!-- Buttons and inputs will appear here -->
+        </div>
+    </div>
+    
+    <footer>
+        <p>Patience, dear Marie. Even the grandest clocks require winding!</p>
+        <button id="howToShareBtn" style="background-color: var(--heading-color); color: var(--bg-color); padding: 8px 15px; border-radius: 5px; border: none; font-family: var(--ui-font); cursor: pointer; margin-top:10px;">How to Share This Page</button>
+    </footer>
+
+    <div id="share-info-modal">
+        <div id="share-info-content">
+            <span class="close-modal-button" onclick="closeShareModal()">×</span>
+            <h3>Sharing Marie's Fixer</h3>
+            <p>This page is currently running as a local file on your device. To share it with others via a link, you'll need to host it online. Here are a few easy and free ways:</p>
+            <ul>
+                <li><strong>GitHub Pages:</strong> If you have a GitHub account, you can easily host static HTML files.</li>
+                <li><strong>Netlify or Vercel:</strong> These platforms offer generous free tiers for hosting static sites. Just drag and drop this HTML file!</li>
+                <li><strong>Glitch or Codepen:</strong> These are great for smaller projects and they host it for you automatically. You can paste the code there.</li>
+            </ul>
+            <p>Once hosted, you can share the web address (URL) of the page.</p>
+            <p>Alternatively, you can simply send this <code>.html</code> file directly to someone (e.g., via email or a messaging app that supports file attachments).</p>
+            <!-- <button id="copy-url-button" onclick="copyCurrentUrl()" style="display:none;">Copy Page Link</button> -->
+        </div>
+    </div>
+
+    <script>
+        const dialogueArea = document.getElementById('dialogue-area');
+        const optionsArea = document.getElementById('options-area');
+        const loadingIndicator = document.querySelector('.loading-indicator');
+        let currentStepId = 'greet_and_ask_model'; 
+        let computerModel = ""; 
+
+        // --- Share Modal Logic ---
+        const shareModal = document.getElementById('share-info-modal');
+        const howToShareBtn = document.getElementById('howToShareBtn');
+        // const copyUrlBtn = document.getElementById('copy-url-button');
+
+        howToShareBtn.onclick = function() {
+            shareModal.style.display = "block";
+            // If the page were actually hosted, we could make the copy button visible
+            // if (window.location.protocol.startsWith('http')) {
+            //    copyUrlBtn.style.display = 'block';
+            // }
+        }
+        function closeShareModal() {
+            shareModal.style.display = "none";
+        }
+        window.onclick = function(event) {
+            if (event.target == shareModal) {
+                closeShareModal();
+            }
+        }
+        // function copyCurrentUrl() {
+        //     navigator.clipboard.writeText(window.location.href).then(() => {
+        //         alert("Page link copied to clipboard!");
+        //     }).catch(err => {
+        //         alert("Could not copy link. Your browser might not support this or you're not on a secure (HTTPS) page.");
+        //     });
+        // }
+
+
+        function typeTexts(element, texts, speed = 30, pauseBetweenLines = 100, onCompleteAll) { // Slightly slower for regal feel
+            let lineIndex = 0;
+            let charIndex = 0;
+            element.innerHTML = ''; 
+
+            function type() {
+                if (lineIndex < texts.length) {
+                    const currentText = texts[lineIndex];
+                    if (charIndex < currentText.length) {
+                        element.innerHTML += currentText.charAt(charIndex);
+                        charIndex++;
+                        setTimeout(type, speed);
+                    } else {
+                        element.innerHTML += '<br>';
+                        lineIndex++;
+                        charIndex = 0;
+                        setTimeout(type, pauseBetweenLines);
+                    }
+                } else {
+                    addQuirkyCommentIfNeeded(element.parentNode); 
+                    if (onCompleteAll) onCompleteAll();
+                }
+            }
+            if (texts && texts.length > 0) {
+                type();
+            } else {
+                addQuirkyCommentIfNeeded(element.parentNode);
+                if (onCompleteAll) onCompleteAll();
+            }
+        }
+        
+        function addQuirkyCommentIfNeeded(parentContainer) {
+            if (Math.random() < 0.20) { // Increased chance slightly
+                const quirkyComments = [
+                    "Speaking of which, Marie, ya know... what a fool believes, he sees. No wise man has the power to reason away what he knows is true! (Big Michael McDonald fan here!)",
+                    "We're takin' it to the streets... of troubleshooting! (Keepin' that Doobie Brothers vibe alive!)",
+                    "If this computer keeps givin' you the runaround, just tell it 'I Keep Forgettin'' how to be difficult! (Michael McDonald wisdom!)",
+                    "Minute by minute, we'll solve this. No doubt about it!"
+                ];
+                const commentText = quirkyComments[Math.floor(Math.random() * quirkyComments.length)];
+                
+                const commentP = document.createElement('p');
+                commentP.className = 'quirky-comment';
+                commentP.textContent = commentText;
+                parentContainer.appendChild(commentP); 
+            }
+        }
+
+        function displayStep(stepId) {
+            currentStepId = stepId;
+            const step = steps[stepId];
+
+            if (!step) {
+                console.error("Error: Step not found!", stepId);
+                dialogueArea.innerHTML = "<p class='escalation-message'>My apologies, a misstep in the script! Unknown step: " + stepId + "</p>";
+                addFinalOptions(true);
+                return;
+            }
+
+            optionsArea.innerHTML = '';
+            loadingIndicator.style.display = 'block';
+
+            const messageContainer = document.createElement('div');
+            dialogueArea.innerHTML = '';
+            dialogueArea.appendChild(messageContainer);
+
+            const processedMessages = (step.messages || []).map(msg => 
+                msg.replace(/\[computerModel\]/g, computerModel || "your esteemed computer")
+                   .replace(/\[herComputerModelSpecific\]/g, computerModel ? `your ${computerModel}` : "your laptop")
+            );
+
+            typeTexts(messageContainer, processedMessages, 30, 100, () => {
+                if (step.question) {
+                    const questionP = document.createElement('p');
+                    questionP.className = 'question-prompt';
+                    dialogueArea.appendChild(questionP); 
+                    const processedQuestion = step.question
+                        .replace(/\[computerModel\]/g, computerModel || "your computer")
+                        .replace(/\[herComputerModelSpecific\]/g, computerModel ? `your ${computerModel}` : "your laptop");
+
+                    typeTexts(questionP, [processedQuestion], 30, 100, () => {
+                        loadingIndicator.style.display = 'none';
+                        renderOptions(step);
+                    });
+                } else {
+                    loadingIndicator.style.display = 'none';
+                    renderOptions(step);
+                }
+            });
+        }
+
+        function renderOptions(step) {
+            optionsArea.innerHTML = ''; 
+
+            if (step.hasInputField) {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.id = 'modelInput';
+                input.placeholder = step.inputPlaceholder || "e.g., Sony VAIO, modèle VGN-FS740W";
+                optionsArea.appendChild(input);
+            }
+
+            if (step.options) {
+                step.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.textContent = option.label;
+                    if (option.class) button.classList.add(option.class);
+                    button.onclick = () => {
+                        if (step.hasInputField && option.action === 'submit_model') {
+                            computerModel = document.getElementById('modelInput').value.trim();
+                            if (computerModel) {
+                                const confirmationP = document.createElement('p');
+                                confirmationP.style.fontStyle = 'italic';
+                                confirmationP.textContent = `Ah, a ${computerModel}! Excellent. Let us proceed.`;
+                                dialogueArea.appendChild(confirmationP);
+                            } else {
+                                computerModel = ""; // Explicitly clear if input is empty
+                            }
+                        }
+                        displayStep(option.next);
+                    };
+                    optionsArea.appendChild(button);
+                });
+            } else if (step.isSolved || step.isEscalation || step.isEnd) {
+                addFinalOptions(step.isSolved);
+            }
+        }
+
+        function addFinalOptions(isSuccess = false) {
+            if (isSuccess) {
+                 const successMsg = document.createElement('p');
+                 successMsg.className = 'solved-message';
+                 successMsg.innerHTML = "⚜️ Magnifique, Marie! It appears we've vanquished the issue! ⚜️<br>Do recall our steps, should this predicament arise anew.";
+                 dialogueArea.appendChild(successMsg);
+            }
+
+            const restartButton = document.createElement('button');
+            restartButton.textContent = "Address Another Concern / Begin Anew";
+            restartButton.onclick = () => { computerModel = ""; displayStep('greet_and_ask_model');};
+            optionsArea.appendChild(restartButton);
+
+            const exitButton = document.createElement('button');
+            exitButton.textContent = "That concludes our consultation. My thanks!";
+            exitButton.classList.add('secondary');
+            exitButton.onclick = () => {
+                dialogueArea.innerHTML = "<p>The pleasure was mine, Marie! May [computerModel] serve you faithfully. Fare thee well!</p>".replace('[computerModel]', computerModel || "your computer");
+                optionsArea.innerHTML = "";
+                loadingIndicator.style.display = 'none';
+            };
+            optionsArea.appendChild(exitButton);
+        }
+
+        // --- STEPS (JavaScript Object) from previous version ---
+        // (No changes needed to the step logic itself, only to styling and surrounding text)
+        const steps = {
+            greet_and_ask_model: {
+                messages: [
+                    "Greetings, esteemed Marie! Your personal Computer Oracle is at your service.",
+                    "To tailor my counsel, might I inquire as to the make and model of your device?"
+                ],
+                question: "Kindly inscribe its designation below (e.g., 'Sony VAIO, VGN-series'). If unknown, simply proceed.",
+                hasInputField: true,
+                inputPlaceholder: "e.g., Sony VAIO, MacBook Air, HP Pavilion",
+                options: [
+                    { label: "Continue with this information", action: 'submit_model', next: "start" },
+                    { label: "Skip / The model is a mystery", next: "start" }
+                ]
+            },
+            start: { 
+                messages: [
+                    "Very well, Marie. Let us diagnose the ailment afflicting [computerModel].",
+                    "With precision and care, we shall prevail!"
+                ],
+                question: "Pray tell, what is the principal affliction you observe today?",
+                options: [
+                    { label: "My device refuses to awaken (No Power).", next: "power_on_start" },
+                    { label: "It stirs, yet the screen remains dark.", next: "no_display_start_placeholder" },
+                    { label: "It performs with regrettable slowness or freezes.", next: "slow_freezing_start_placeholder" },
+                    { label: "The internet connection has vanished.", next: "no_internet_start" },
+                    { label: "Another matter entirely / Conclude.", next: "exit_other" }
+                ]
+            },
+            exit_other: {
+                messages: [
+                    "Ah, if the trouble with [computerModel] is of a different nature, my current script may not suffice.",
+                    "Perchance, consulting a learned technician or a sagacious acquaintance would be prudent."
+                ],
+                isEnd: true
+            },
+            power_on_start: {
+                messages: ["So, [computerModel] shows no sign of life? No lights, no hum, an utter silence?"],
+                question: "Is this an accurate depiction of its state?",
+                options: [
+                    { label: "Indeed, it is entirely unresponsive.", next: "power_on_basics" },
+                    { label: "Nay, there are faint signs (lights/fans).", next: "power_on_some_signs" }
+                ]
+            },
+            power_on_some_signs: {
+                messages: [
+                    "If [computerModel] displays some vitality, the issue may lie elsewhere.",
+                    "Let us return to the primary list of symptoms for a more apt selection."
+                ],
+                isEnd: true 
+            },
+            power_on_basics: {
+                messages: [ "Let us verify the fundamental connections for [computerModel]. Even the wisest overlook these at times!"],
+                 question: "Is the power cord firmly ensconced within the wall receptacle?",
+                options: [
+                    { label: "Yes, it is securely connected to the wall.", next: "power_on_cable_to_pc" },
+                    { label: "No, it was askew or unplugged!", next: "power_on_plug_in_wall_try" }
+                ]
+            },
+            power_on_plug_in_wall_try: {
+                messages: ["Pray, secure it firmly within the wall socket and attempt to awaken [computerModel] once more."],
+                question: "Has it now stirred to life?",
+                options: [
+                    { label: "Yes! It has awakened!", next: "solved_power_cable_wall" },
+                    { label: "Alas, no, it remains dormant.", next: "power_on_cable_to_pc" }
+                ]
+            },
+            solved_power_cable_wall: {
+                messages: ["Splendid! A simple misalignment of the cord to the wall was the culprit for [computerModel]."],
+                isSolved: true
+            },
+             power_on_cable_to_pc: {
+                messages: [
+                    "Next, examine the cord's other terminus. Is it securely attached to [herComputerModelSpecific] itself (or its charging port)?"
+                ],
+                question: "Is this connection sound?",
+                options: [
+                    { label: "Yes, it is firmly connected to the device.", next: "power_on_power_strip" },
+                    { label: "No, this end was also loose or detached!", next: "power_on_plug_in_pc_try" }
+                ]
+            },
+            power_on_plug_in_pc_try: {
+                messages: ["Secure this end to [computerModel] and press the power button with hope."],
+                question: "Has fortune smiled upon us? Is it on?",
+                options: [
+                    { label: "Yes! It lives!", next: "solved_power_cable_pc" },
+                    { label: "Nay, still no response.", next: "power_on_power_strip" }
+                ]
+            },
+            solved_power_cable_pc: {
+                messages: ["Excellent! The cord to [computerModel] required adjustment. A most welcome resolution!"],
+                isSolved: true
+            },
+            power_on_power_strip: {
+                messages: ["Are you employing a power strip or surge protector for [computerModel]?"],
+                question: "Is such a device in use?",
+                options: [
+                    { label: "Yes, a power strip is in use.", next: "power_on_power_strip_check" },
+                    { label: "No, it is directly connected to the wall.", next: "power_on_monitor_quick_check" }
+                ]
+            },
+            power_on_power_strip_check: {
+                messages: [
+                    "These strips can possess their own switches or circuit interrupters.",
+                    "  a. Is the power strip itself switched to the 'ON' position?",
+                    "  b. Does it feature a small reset button? If so, press it.",
+                    "  c. As a test, connect [computerModel] directly to the wall outlet, bypassing the strip."
+                ],
+                question: "After these checks, did [computerModel] power on?",
+                options: [
+                    { label: "Yes, it has powered on!", next: "solved_power_strip_issue" },
+                    { label: "No, it remains inert (even directly to wall).", next: "power_on_monitor_quick_check" }
+                ]
+            },
+            solved_power_strip_issue: {
+                messages: [
+                    "Marvelous! The power strip was the source of the impediment for [computerModel].",
+                    "Should bypassing it have been the solution, a replacement strip may be in order."
+                ],
+                isSolved: true
+            },
+            power_on_monitor_quick_check: {
+                 messages: [
+                    "A swift check of the monitor, though unlikely if [computerModel] is entirely without power.",
+                    "Is the monitor itself illuminated, indicating it has power?"
+                ],
+                question: "Does the monitor's power light shine?",
+                options: [
+                    { label: "Yes, the monitor's light is on.", next: "power_on_final_thoughts" },
+                    { label: "No, the monitor's light is off.", next: "power_on_turn_on_monitor" }
+                ]
+            },
+            power_on_turn_on_monitor: {
+                messages: ["Attempt to power on the monitor. If [computerModel] was subtly active, you might now see its display."],
+                question: "Upon activating the monitor, does an image from [computerModel] appear?",
+                 options: [
+                    { label: "Yes, the screen is now visible!", next: "no_display_start_placeholder" },
+                    { label: "No, the monitor is on, but no image from the computer.", next: "power_on_final_thoughts" }
+                ]
+            },
+            power_on_final_thoughts: {
+                messages: [
+                    "Marie, we have diligently reviewed the common external power concerns for [computerModel].",
+                    "If it remains entirely lifeless, a more profound internal malady may be at play (e.g., a faulty power supply unit).",
+                    "It would be wise to summon a skilled technician or a knowledgeable acquaintance for [computerModel]."
+                ],
+                isEscalation: true
+            },
+
+            // --- NO INTERNET PATH ---
+            no_internet_start: {
+                messages: ["No internet for [computerModel]? A vexing predicament in our modern age! Let us restore connectivity."],
+                question: "Is this affliction unique to [computerModel], or do other devices (phones, tablets) also lack internet access?",
+                options: [
+                    { label: "Other devices are also offline.", next: "no_internet_all_devices" },
+                    { label: "Only [computerModel] is forsaken by the internet.", next: "no_internet_pc_airplane_mode_check" } 
+                ]
+            },
+            no_internet_all_devices: {
+                 messages: [
+                    "If all devices are adrift, the fault likely lies with your modem, router, or internet purveyor.",
+                    "A common remedy is to restart these apparatuses.",
+                    "  1. Disconnect power from your MODEM. Wait 30 heartbeats.",
+                    "  2. If your ROUTER is separate, disconnect its power. Wait another 30 heartbeats.",
+                    "  3. Reconnect the MODEM. Allow its lights to stabilize (this may take several minutes).",
+                    "  4. Once the modem appears content, reconnect the ROUTER. Await its stabilization."
+                ],
+                question: "Following this grand reset, has internet access been restored to your devices?",
+                options: [
+                    { label: "Yes! The internet flows once more!", next: "solved_internet_modem_restart" },
+                    { label: "Alas, no, all devices remain disconnected.", next: "no_internet_contact_isp" }
+                ]
+            },
+            solved_internet_modem_restart: {
+                messages: ["Triumphant! Restarting the modem and router often resolves such widespread issues. You are reconnected!"],
+                isSolved: true
+            },
+            no_internet_contact_isp: {
+                 messages: [
+                    "If restarting the equipment bore no fruit, an outage may plague your region, or your service itself may be troubled.",
+                    "It is prudent to consult your Internet Service Provider (ISP)."
+                ],
+                question: "Have you conferred with your ISP or found resolution through their aid?",
+                options: [
+                    { label: "Yes, the ISP confirmed an issue / provided a fix.", next: "solved_internet_isp_help" },
+                    { label: "No, the ISP reports all is well / I have not yet reached them.", next: "no_internet_isp_no_fix" }
+                ]
+            },
+            solved_internet_isp_help: {
+                 messages: ["Excellent that your ISP could elucidate or assist! May normal service resume swiftly."],
+                 isSolved: true
+            },
+            no_internet_isp_no_fix: {
+                 messages: [
+                    "Should your ISP assert all is well from their end, the issue might be a defective modem/router or a complex line fault requiring a technician.",
+                    "Persist in your dialogue with the ISP for further investigation."
+                ],
+                isEscalation: true 
+            },
+            no_internet_pc_airplane_mode_check: {
+                messages: [
+                    "So, only [herComputerModelSpecific] is affected. A frequent suspect, especially on laptops, is 'Airplane Mode' being inadvertently engaged.",
+                    "Many laptops (some Sony VAIOs included) possess a physical wireless switch or a function key combination (e.g., Fn + F1/F2, or a key with a ✈️ or (( antenna )) symbol).",
+                    "Certain older VAIOs might also have a 'VAIO Smart Network' utility managing this."
+                ],
+                question: "Pray, investigate these possibilities. Is Airplane Mode OFF and Wi-Fi ON?",
+                options: [
+                    { label: "Yes! That was the fiend! Wi-Fi is restored!", next: "solved_internet_pc_airplane_mode" },
+                    { label: "No, I've checked; Airplane Mode is off or it made no difference.", next: "no_internet_this_pc_only_type" }
+                ]
+            },
+            solved_internet_pc_airplane_mode: {
+                messages: ["Jubilation! That elusive Airplane Mode on [herComputerModelSpecific] was indeed the cause. You are back online!"],
+                isSolved: true
+            },
+            no_internet_this_pc_only_type: { 
+                messages: ["If Airplane Mode on [herComputerModelSpecific] was not the cause..."],
+                question: "How is [herComputerModelSpecific] typically tethered to your router?",
+                options: [
+                    { label: "Via Wi-Fi (Wireless)", next: "no_internet_pc_wifi_check" },
+                    { label: "Via Ethernet Cable (Wired)", next: "no_internet_pc_cable_check" }
+                ]
+            },
+            no_internet_pc_wifi_check: {
+                messages: [
+                    "Let us re-verify the Wi-Fi settings on [herComputerModelSpecific]:",
+                    "  - Are you certain you are connected to the CORRECT Wi-Fi network?",
+                    "  - If a password is required, was it entered with perfect accuracy? (These are case-sensitive!)",
+                    "Attempt to disconnect from the Wi-Fi network, then reconnect with diligence."
+                ],
+                question: "Did this reconnection ritual restore internet to [herComputerModelSpecific]?",
+                options: [
+                    { label: "Yes, the internet connection is revived!", next: "solved_internet_pc_wifi_reconnect" },
+                    { label: "No, the void of no internet persists.", next: "no_internet_pc_restart_computer" } 
+                ]
+            },
+            solved_internet_pc_wifi_reconnect: {
+                messages: ["Superb! Sometimes [herComputerModelSpecific] merely needs a gentle reminder of its designated network."],
+                isSolved: true
+            },
+            no_internet_pc_cable_check: {
+                messages: [
+                    "For a cabled connection on [herComputerModelSpecific], let us inspect the Ethernet cord:",
+                    "  - Is it securely seated in both the computer's port and a port on your router? A distinct 'click' should be felt.",
+                    "  - Do any lights flicker near the port on [herComputerModelSpecific]?",
+                    "Try detaching and reattaching both ends of this cable."
+                ],
+                question: "After this cable inspection, does [herComputerModelSpecific] have internet?",
+                options: [
+                    { label: "Yes, the internet has returned!", next: "solved_internet_pc_cable_reseat" },
+                    { label: "No, the cable check yielded no improvement.", next: "no_internet_pc_try_router_port" }
+                ]
+            },
+            solved_internet_pc_cable_reseat: {
+                 messages: ["Well done! A loosely connected Ethernet cable is a frequent troublemaker for [herComputerModelSpecific]."],
+                 isSolved: true
+            },
+            no_internet_pc_try_router_port: {
+                messages: ["If your router offers multiple Ethernet LAN ports, try connecting the cable for [herComputerModelSpecific] to an alternative port."],
+                question: "Did employing a different router port prove fruitful?",
+                options: [
+                    { label: "Yes, that resolved it!", next: "solved_internet_pc_router_port" },
+                    { label: "No, still no internet connection.", next: "no_internet_pc_restart_computer" }
+                ]
+            },
+            solved_internet_pc_router_port: {
+                messages: ["Insightful! It appears that specific router port may be compromised. Glad [herComputerModelSpecific] is now connected!"],
+                isSolved: true
+            },
+            no_internet_pc_restart_computer: {
+                messages: [
+                    "Ah, the venerable ritual of restarting [herComputerModelSpecific]. Have you performed a full system reboot since this internet absence began?",
+                    "Not merely slumber, but a complete shutdown followed by a fresh start."
+                ],
+                question: "Kindly restart [herComputerModelSpecific] now. Did this sacred act restore its internet connection?",
+                options: [
+                    { label: "Yes, the restart was efficacious!", next: "solved_internet_pc_reboot" },
+                    { label: "No, the internet remains elusive post-restart.", next: "no_internet_pc_troubleshooter" }
+                ]
+            },
+            solved_internet_pc_reboot: {
+                messages: ["The mystical power of a reboot prevails for [herComputerModelSpecific]! Delighted this simple act sufficed."],
+                isSolved: true
+            },
+            no_internet_pc_troubleshooter: {
+                messages: [
+                    "Most operating systems (such as Windows on [herComputerModelSpecific]) include a built-in network diagnostic tool.",
+                    "  - On Windows: Right-click the network icon (Wi-Fi or cabled) and select 'Troubleshoot problems'.",
+                    "Engage this troubleshooter and heed its counsel."
+                ],
+                question: "Did this automated diagnostician identify and mend the issue on [herComputerModelSpecific]?",
+                options: [
+                    { label: "Yes, the troubleshooter was victorious!", next: "solved_internet_pc_troubleshooter" },
+                    { label: "No, the troubleshooter offered no remedy.", next: "no_internet_pc_advanced" }
+                ]
+            },
+            solved_internet_pc_troubleshooter: {
+                messages: ["Capital! These troubleshooters can indeed perform small miracles for [herComputerModelSpecific]!"],
+                isSolved: true
+            },
+            no_internet_pc_advanced: {
+                messages: [
+                    "Hmm, if only [herComputerModelSpecific] is affected and our efforts thus far are unavailing, the malady may be more intricate:",
+                    "  - The network adapter drivers may require updating or reinstalling.",
+                    "  - Erroneous network configurations or firewall obstructions.",
+                    "These matters demand a more expert touch. Perhaps a technologically adept friend or a professional consultant for [herComputerModelSpecific] is now in order."
+                ],
+                isEscalation: true
+            },
+            no_display_start_placeholder: {
+                messages: ["So [computerModel] awakens, yet the screen remains shrouded in darkness.",
+                           "This particular chapter of my diagnostic grimoire is yet to be fully inscribed. Pray, select another option or begin anew."],
+                isEnd: true
+            },
+            slow_freezing_start_placeholder: {
+                messages: ["A [computerModel] that performs with such lethargy or freezes is indeed a trial!",
+                           "This section, alas, is currently under development. Please choose another path or restart our journey."],
+                isEnd: true
+            }
+        };
+        // End of STEPS object
+
+        document.addEventListener('DOMContentLoaded', () => {
+            displayStep(currentStepId); 
+        });
+
+    </script>
+
+</body>
+</html>
